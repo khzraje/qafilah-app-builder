@@ -1,6 +1,5 @@
 
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import AddMemberForm from "@/components/AddMemberForm";
 import MembersTable from "@/components/MembersTable";
 import { useEffect, useState } from "react";
 import { Member } from "@/models/Member";
@@ -8,11 +7,12 @@ import { memberService } from "@/services/MemberService";
 import { Button } from "@/components/ui/button";
 import { Download, FilePlus, Search, Users } from "lucide-react";
 import { Input } from "@/components/ui/input";
+import AddMemberDialog from "@/components/AddMemberDialog";
 
 const Index = () => {
   const [members, setMembers] = useState<Member[]>([]);
   const [searchQuery, setSearchQuery] = useState("");
-  const [activeTab, setActiveTab] = useState("members");
+  const [isAddMemberOpen, setIsAddMemberOpen] = useState(false);
 
   const loadMembers = () => {
     setMembers(memberService.getAllMembers());
@@ -27,7 +27,7 @@ const Index = () => {
   const exportMembers = () => {
     const csv = memberService.exportMembersToCSV();
     if (!csv) {
-      alert("لا يوجد أعضاء لتصديرهم");
+      toast.error("لا يوجد أعضاء لتصديرهم");
       return;
     }
 
@@ -46,68 +46,53 @@ const Index = () => {
   }, []);
 
   return (
-    <div className="min-h-screen bg-white" dir="rtl">
-      <div className="container max-w-7xl mx-auto py-8">
-        <div className="text-center mb-8">
-          <h1 className="text-3xl font-bold text-qafilah-primary">نظام تسجيل الأعضاء</h1>
-          <p className="text-gray-600 mt-2">سجل وأدر أعضاء منظمتك الخيرية بسهولة</p>
+    <div className="min-h-screen bg-gradient-to-br from-white to-gray-50" dir="rtl">
+      <div className="container max-w-7xl mx-auto py-8 px-4">
+        <div className="text-center mb-12">
+          <h1 className="text-4xl font-bold text-qafilah-primary mb-3">نظام تسجيل الأعضاء</h1>
+          <p className="text-gray-600 text-lg">سجل وأدر أعضاء منظمتك بكل سهولة</p>
         </div>
 
-        <div className="flex justify-end mb-4">
-          <Button 
-            variant="outline" 
-            className="flex items-center gap-2"
-            onClick={exportMembers}
-          >
-            <Download size={18} />
-            استيراد الأعضاء
-          </Button>
-        </div>
-
-        <Tabs 
-          defaultValue="members" 
-          value={activeTab} 
-          onValueChange={setActiveTab}
-          className="bg-white rounded-lg shadow-sm border"
-        >
-          <div className="flex justify-between items-center p-4 border-b">
-            <TabsList className="bg-qafilah-light">
-              <TabsTrigger value="members" className="flex items-center gap-2">
-                <Users size={18} />
-                قائمة الأعضاء
-              </TabsTrigger>
-              <TabsTrigger value="add" className="flex items-center gap-2">
+        <div className="bg-white rounded-2xl shadow-sm border p-6">
+          <div className="flex flex-col sm:flex-row justify-between items-center gap-4 mb-6">
+            <div className="flex items-center gap-4">
+              <Button 
+                onClick={() => setIsAddMemberOpen(true)}
+                className="bg-qafilah-primary hover:bg-qafilah-hover flex items-center gap-2"
+              >
                 <FilePlus size={18} />
                 إضافة عضو جديد
-              </TabsTrigger>
-            </TabsList>
+              </Button>
 
-            {activeTab === "members" && (
-              <div className="relative">
-                <Search size={18} className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
-                <Input
-                  placeholder="بحث عن عضو..."
-                  value={searchQuery}
-                  onChange={handleSearch}
-                  className="pr-10 w-64"
-                />
-              </div>
-            )}
+              <Button 
+                variant="outline" 
+                className="flex items-center gap-2"
+                onClick={exportMembers}
+              >
+                <Download size={18} />
+                تصدير الأعضاء
+              </Button>
+            </div>
+
+            <div className="relative w-full sm:w-auto">
+              <Search size={18} className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
+              <Input
+                placeholder="بحث عن عضو..."
+                value={searchQuery}
+                onChange={handleSearch}
+                className="pr-10 w-full sm:w-64"
+              />
+            </div>
           </div>
 
-          <TabsContent value="members" className="px-4 py-6">
-            <MembersTable members={members} onMemberDeleted={loadMembers} />
-          </TabsContent>
+          <MembersTable members={members} onMemberDeleted={loadMembers} />
+        </div>
 
-          <TabsContent value="add" className="px-4 py-6">
-            <div className="max-w-md mx-auto">
-              <AddMemberForm onMemberAdded={() => {
-                loadMembers();
-                setActiveTab("members");
-              }} />
-            </div>
-          </TabsContent>
-        </Tabs>
+        <AddMemberDialog 
+          open={isAddMemberOpen}
+          onClose={() => setIsAddMemberOpen(false)}
+          onMemberAdded={loadMembers}
+        />
       </div>
     </div>
   );
