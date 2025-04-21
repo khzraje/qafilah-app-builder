@@ -1,4 +1,3 @@
-
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import MembersTable from "@/components/MembersTable";
 import { useEffect, useState } from "react";
@@ -8,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Download, FilePlus, Search, Users } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import AddMemberDialog from "@/components/AddMemberDialog";
+import { toast } from "sonner";
 
 const Index = () => {
   const [members, setMembers] = useState<Member[]>([]);
